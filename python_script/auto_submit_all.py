@@ -23,10 +23,12 @@ total=100
 #     print(question["order_idx"]+1,question["choices"][question["correct_answer"]])
 
 response = requests.get('http://simon.nekko.cn:1234/api/student-keys/'+exam_id).json()
-print(response)
 for key in response:
-    login=requests.get('http://simon.nekko.cn:1234/api/student/login', params=key["student_key"]).json()
-    print(login)
+    #if key["student_key"]!="6XSMW3XS":
+    #    continue
+    login=requests.get('http://simon.nekko.cn:1234/api/student/login', params={"key":key["student_key"]}).json()
+    print(login,key["student_key"])
+
     studentKeyId=login['id']
     student_name=key["student_name"]
 
@@ -36,5 +38,6 @@ for key in response:
         'answers_data': [], 'tab_switches': 0
     }
     response = requests.post('http://simon.nekko.cn:1234/api/records', json=body)
+    print(response.json())
 
 
