@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEBS 模拟考试平台</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="NEBS考试" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F7F6F3; --surface: #FFFFFF; --surface2: #F0EFE9;
+      --border: rgba(0,0,0,0.08); --border-md: rgba(0,0,0,0.14);
+      --text: #1A1A18; --text2: #6B6A65; --text3: #9B9A94;
+      --blue: #185FA5; --blue-light: #E6F1FB; --blue-mid: #378ADD;
+      --green: #3B6D11; --green-light: #EAF3DE;
+      --red: #A32D2D; --red-light: #FCEBEB;
+      --amber: #BA7517; --amber-light: #FAEEDA;
+      --radius: 10px; --radius-sm: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    #app { min-height: 100vh; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 54px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .nav-logo { display: flex; flex-direction: column; justify-content: center; }
+    .nav-logo-main { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); }
+    .nav-logo-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.2px; }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .user-chip { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text2); background: var(--surface2); padding: 4px 10px; border-radius: 999px; }
+    .avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; border: 1px solid var(--border-md); background: var(--surface); color: var(--text); transition: all 0.13s; white-space: nowrap; }
+    .btn:hover { background: var(--surface2); }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-primary { background: var(--blue); color: white; border-color: var(--blue); }
+    .btn-primary:hover { background: #0C447C; border-color: #0C447C; }
+    .btn-ghost { border-color: transparent; background: transparent; color: var(--text2); }
+    .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+    .btn-danger { background: var(--red-light); color: var(--red); border-color: transparent; }
+    .btn-danger:hover { background: #f7c1c1; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    .btn-lg { padding: 10px 20px; font-size: 15px; }
+    .btn-block { width: 100%; }
+    .icon-btn { padding: 6px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); cursor: pointer; color: var(--text2); display: inline-flex; align-items: center; justify-content: center; }
+    .icon-btn:hover { background: var(--surface2); color: var(--text); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 5px; letter-spacing: 0.3px; text-transform: uppercase; }
+    .form-input { width: 100%; padding: 9px 12px; border: 1px solid var(--border-md); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; transition: border-color 0.15s, box-shadow 0.15s; }
+    .form-input:focus { outline: none; border-color: var(--blue-mid); box-shadow: 0 0 0 3px rgba(55,138,221,0.12); }
+    .form-input::placeholder { color: var(--text3); }
+    textarea.form-input { resize: vertical; min-height: 70px; }
+    select.form-input { cursor: pointer; }
+    .form-hint { font-size: 12px; color: var(--text3); margin-top: 4px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+    .card-hover { transition: box-shadow 0.15s, border-color 0.15s; }
+    .card-hover:hover { box-shadow: var(--shadow-md); border-color: var(--border-md); }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+    .badge-blue { background: var(--blue-light); color: #0C447C; }
+    .badge-green { background: var(--green-light); color: #173404; }
+    .badge-amber { background: var(--amber-light); color: #412402; }
+    .badge-red { background: var(--red-light); color: #501313; }
+    .badge-gray { background: var(--surface2); color: var(--text2); }
+    .page { padding: 28px 24px; max-width: 1000px; margin: 0 auto; }
+    .page-sm { padding: 28px 24px; max-width: 640px; margin: 0 auto; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .section-title { font-size: 17px; font-weight: 600; }
+    .flex { display: flex; align-items: center; }
+    .flex-between { display: flex; align-items: center; justify-content: space-between; }
+    .gap-1 { gap: 6px; } .gap-2 { gap: 10px; } .gap-3 { gap: 16px; }
+    .mt-1 { margin-top: 6px; } .mt-2 { margin-top: 12px; } .mt-3 { margin-top: 20px; }
+    .mb-1 { margin-bottom: 6px; } .mb-2 { margin-bottom: 12px; } .mb-3 { margin-bottom: 20px; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+    .tab-nav { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 22px; }
+    .tab-btn { padding: 9px 16px; font-size: 13px; font-weight: 500; color: var(--text2); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.13s; font-family: 'DM Sans', sans-serif; }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .alert { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 14px; display: none; }
+    .alert-danger { background: var(--red-light); color: var(--red); border-left: 3px solid var(--red); }
+    .alert-success { background: var(--green-light); color: var(--green); border-left: 3px solid var(--green); }
+    .alert-info { background: var(--blue-light); color: #0C447C; border-left: 3px solid var(--blue-mid); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; backdrop-filter: blur(2px); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--surface); border-radius: var(--radius); padding: 24px; width: 600px; max-width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-md); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .modal-title { font-size: 16px; font-weight: 600; }
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: var(--surface2); padding: 10px 14px; text-align: left; font-weight: 500; color: var(--text2); font-size: 12px; letter-spacing: 0.3px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg); }
+    .progress { height: 5px; background: var(--surface2); border-radius: 999px; overflow: hidden; }
+    .progress-bar { height: 100%; background: var(--blue); border-radius: 999px; transition: width 0.4s ease; }
+    .choice-option { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: 1.5px solid var(--border-md); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 14px; cursor: pointer; text-align: left; margin-bottom: 8px; transition: all 0.12s; font-family: 'DM Sans', sans-serif; }
+    .choice-option:hover { border-color: var(--blue-mid); background: var(--blue-light); }
+    .choice-option.selected { border-color: var(--blue); background: var(--blue-light); color: #0C447C; }
+    .choice-option.correct-ans { border-color: var(--green); background: var(--green-light); color: #173404; }
+    .choice-option.wrong-ans { border-color: var(--red); background: var(--red-light); color: #501313; }
+    .choice-letter { font-weight: 600; min-width: 22px; font-size: 13px; }
+    .question-img { max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); margin: 10px 0; max-height: 480px; object-fit: contain; display: block; }
+    .upload-zone { border: 1.5px dashed var(--border-md); border-radius: var(--radius-sm); padding: 22px; text-align: center; cursor: pointer; color: var(--text2); font-size: 13px; transition: all 0.15s; }
+    .upload-zone:hover { border-color: var(--blue-mid); background: var(--blue-light); color: #0C447C; }
+    .upload-icon { font-size: 24px; margin-bottom: 6px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px 16px; }
+    .stat-val { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; }
+    .stat-label { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .score-ring { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; }
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text2); }
+    .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+    .empty-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+    .empty-desc { font-size: 13px; }
+    .spinner { width: 18px; height: 18px; border: 2px solid var(--border-md); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 14px; color: var(--text2); font-size: 14px; }
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1A1A18; color: white; padding: 10px 18px; border-radius: 999px; font-size: 13px; z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+    #toast.show { opacity: 1; }
+    .result-hero { text-align: center; padding: 32px 0 24px; }
+    .result-score { font-size: 72px; font-weight: 600; letter-spacing: -2px; line-height: 1; }
+    .q-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; font-size: 13px; }
+    .q-row-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .key-display { display: inline-flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 12px; font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; letter-spacing: 1px; }
+    .sk-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 5px; font-size: 13px; }
+    .sk-name { font-weight: 500; min-width: 120px; }
+    .sk-key { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1px; color: var(--blue); background: var(--blue-light); padding: 3px 8px; border-radius: 4px; }
+    .sk-status { font-size: 11px; }
+    .page-footer { position: fixed; bottom: 14px; left: 18px; font-size: 11px; color: var(--text3); pointer-events: none; }
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .page, .page-sm { padding: 16px; }
+      .modal { padding: 18px; }
+      .nav { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- Loading -->
+  <div id="screen-loading" class="screen active">
+    <div class="loading-screen">
+      <div class="spinner"></div>
+      <span>正在连接数据库…</span>
+    </div>
+  </div>
+
+  <!-- Login -->
+  <div id="screen-login" class="screen">
+    <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;">
+      <div style="width:100%; max-width:380px;">
+        <div style="text-align:center; margin-bottom:28px;">
+          <div style="font-size:20px; font-weight:700; letter-spacing:-0.3px; margin-bottom:4px;">NEBS 上海新纪元双语学校</div>
+          <div style="font-size:14px; color:var(--text2); font-weight:400;">模拟考试平台</div>
+        </div>
+        <div class="card" style="box-shadow:var(--shadow-md);">
+          <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchLoginTab('student')">学生登录</button>
+            <button class="tab-btn" onclick="switchLoginTab('teacher')">教师登录</button>
+          </div>
+          <!-- Student -->
+          <div id="login-student-panel">
+            <div id="ipad-safari-alert" class="alert alert-info" style="display:none;">
+              📱 检测到你正在使用 iPad Safari。建议点击底部 <strong>分享按钮 → 添加到主屏幕</strong>，然后从桌面图标打开，可避免误触退出。或改用 <strong>Chrome</strong> 打开。
+            </div>
+            <div id="stu-alert" class="alert alert-danger"></div>
+            <div class="form-group">
+              <label class="form-label">你的专属密钥</label>
+              <input class="form-input" id="stu-key" type="text" placeholder="输入老师给你的专属密钥" style="font-family:'DM Mono',monospace;letter-spacing:5px;" />
+              <div class="form-hint">每位同学有独立密钥，请勿分享给他人</div>
+            </div>
+            <button class="btn btn-primary btn-block btn-lg" onclick="studentLogin()">进入考试</button>
+          </div>
+          <!-- Teacher -->
+          <div id="login-teacher-panel" style="display:none;">
+            <div id="tea-alert" class="alert alert-danger"></div>
+            <div class="form-group">
+              <label class="form-label">账号</label>
+              <input class="form-input" id="tea-email" type="text" placeholder="admin" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">密码</label>
+              <input class="form-input" id="tea-pass" type="password" placeholder="••••••••" />
+            </div>
+            <button class="btn btn-primary btn-block btn-lg" onclick="teacherLogin()">教师登录</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teacher Dashboard -->
+  <div id="screen-teacher" class="screen">
+    <nav class="nav">
+      <div class="nav-logo">
+        <div class="nav-logo-main">NEBS 上海新纪元双语学校</div>
+        <div class="nav-logo-sub">模拟考试平台 · 教师端</div>
+      </div>
+      <div class="nav-right">
+        <div class="user-chip"><div class="avatar" id="teacher-avatar">T</div><span id="teacher-name-display">老师</span></div>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">退出</button>
+      </div>
+    </nav>
+    <div class="page">
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTeacherTab('exams')">考试管理</button>
+        <button class="tab-btn" onclick="switchTeacherTab('live')">👀 实时监考</button>
+      </div>
+      <div id="teacher-tab-exams">
+        <div class="section-header">
+          <div class="flex gap-2" style="align-items:center;flex-wrap:wrap;">
+            <div class="section-title">我的考试</div>
+            <select class="form-input" id="exam-filter-subject" style="width:170px;font-size:13px;" onchange="renderExamList()">
+              <option value="">全部科目</option>
+              <option value="Mathematics（数学）">Mathematics（数学）</option>
+              <option value="Science（自然科学）">Science（自然科学）</option>
+              <option value="Language & Literature（语言与文学）">Language & Literature（语言与文学）</option>
+              <option value="Foreign Languages（外语）">Foreign Languages（外语）</option>
+              <option value="Social Studies / Humanities（社会科学 / 人文学科）">Social Studies / Humanities（社会科学 / 人文学科）</option>
+              <option value="Computer Science & Technology（计算机与技术）">Computer Science & Technology（计算机与技术）</option>
+              <option value="Arts（艺术）">Arts（艺术）</option>
+              <option value="Physical Education & Health（体育与健康）">Physical Education & Health（体育与健康）</option>
+              <option value="Business & Economics（商业与经济）">Business & Economics（商业与经济）</option>
+              <option value="Career & Technical Education（职业与技术教育）">Career & Technical Education（职业与技术教育）</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="openCreateExam()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            新建考试
+          </button>
+        </div>
+        <div id="exam-list-container"></div>
+      </div>
+      <div id="teacher-tab-live" style="display:none;padding:4px 0;"></div>
+      <div id="teacher-tab-records" style="display:none;">
+        <div class="section-header">
+          <div class="section-title">学生成绩记录</div>
+          <div class="flex gap-2" style="flex-wrap:wrap;">
+            <select class="form-input" id="records-filter-subject" style="width:155px;font-size:13px;" onchange="renderRecords()">
+              <option value="">全部科目</option>
+              <option value="Mathematics（数学）">Mathematics（数学）</option>
+              <option value="Science（自然科学）">Science（自然科学）</option>
+              <option value="Language & Literature（语言与文学）">Language & Literature（语言与文学）</option>
+              <option value="Foreign Languages（外语）">Foreign Languages（外语）</option>
+              <option value="Social Studies / Humanities（社会科学 / 人文学科）">Social Studies / Humanities（社会科学 / 人文学科）</option>
+              <option value="Computer Science & Technology（计算机与技术）">Computer Science & Technology（计算机与技术）</option>
+              <option value="Arts（艺术）">Arts（艺术）</option>
+              <option value="Physical Education & Health（体育与健康）">Physical Education & Health（体育与健康）</option>
+              <option value="Business & Economics（商业与经济）">Business & Economics（商业与经济）</option>
+              <option value="Career & Technical Education（职业与技术教育）">Career & Technical Education（职业与技术教育）</option>
+            </select>
+            <select class="form-input" id="records-filter-exam" style="width:190px;font-size:13px;" onchange="renderRecords()">
+              <option value="">全部考试</option>
+            </select>
+          </div>
+        </div>
+        <div class="stats-grid" id="records-stats"></div>
+        <div id="records-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student Dashboard -->
+  <div id="screen-student" class="screen">
+    <nav class="nav">
+      <div class="nav-logo">
+        <div class="nav-logo-main">NEBS 上海新纪元双语学校</div>
+        <div class="nav-logo-sub">模拟考试平台</div>
+      </div>
+      <div class="nav-right">
+        <div class="user-chip"><div class="avatar" id="student-avatar-nav" style="background:#EAF3DE;color:#3B6D11;">S</div><span id="student-name-nav"></span></div>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">退出</button>
+      </div>
+    </nav>
+    <div class="page-sm"><div id="student-exam-list"></div></div>
+  </div>
+
+  <!-- Exam Taking -->
+  <div id="screen-exam" class="screen">
+    <nav class="nav">
+      <div class="nav-logo"><div class="nav-logo-main">NEBS 模拟考试平台</div></div>
+      <div class="nav-right" style="gap:14px;">
+        <div id="exam-timer" style="display:none;align-items:center;gap:6px;font-size:15px;font-weight:600;font-family:'DM Mono',monospace;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 4v3l2 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <span id="exam-timer-text">00:00</span>
+        </div>
+        <span style="font-size:13px;color:var(--text2);" id="exam-nav-info"></span>
+      </div>
+    </nav>
+    <div style="padding:0;width:100%;">
+      <div class="progress" style="margin:0;border-radius:0;height:3px;"><div class="progress-bar" id="exam-progress-bar" style="width:0%"></div></div>
+      <div id="anti-cheat-banner" style="display:none;background:#FAEEDA;border:1px solid #EF9F27;border-radius:6px;padding:8px 14px;font-size:13px;color:#412402;align-items:center;gap:8px;"></div>
+      <div id="exam-question-area" style="padding:16px 20px;"></div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="screen-results" class="screen">
+    <nav class="nav">
+      <div class="nav-logo"><div class="nav-logo-main">NEBS 模拟考试平台</div></div>
+      <div class="nav-right"><button class="btn btn-ghost btn-sm" onclick="showScreen('student')">返回列表</button></div>
+    </nav>
+    <div class="page-sm"><div id="results-content"></div></div>
+  </div>
+</div>
+
+<!-- 页脚署名 -->
+<div class="page-footer">Designed by 范刘帅 &nbsp;·&nbsp; Made in Shanghai</div>
+
+<!-- 新建/编辑考试 Modal -->
+<div class="modal-overlay" id="modal-exam">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="exam-modal-title">新建考试</div>
+      <button class="icon-btn" onclick="closeExamModal()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <div id="exam-modal-alert" class="alert alert-danger"></div>
+    <div class="form-group"><label class="form-label">考试名称</label><input class="form-input" id="modal-exam-name" placeholder="如：高三数学第一次模考" /></div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">科目</label>
+        <input class="form-input" id="modal-exam-subject" list="subject-list" placeholder="选择或输入科目…" autocomplete="off" />
+        <datalist id="subject-list">
+          <option value="Mathematics（数学）">
+          <option value="Science（自然科学）">
+          <option value="Language & Literature（语言与文学）">
+          <option value="Foreign Languages（外语）">
+          <option value="Social Studies / Humanities（社会科学 / 人文学科）">
+          <option value="Computer Science & Technology（计算机与技术）">
+          <option value="Arts（艺术）">
+          <option value="Physical Education & Health（体育与健康）">
+          <option value="Business & Economics（商业与经济）">
+          <option value="Career & Technical Education（职业与技术教育）">
+        </datalist>
+      </div>
+      <div class="form-group">
+        <label class="form-label">选项数量 <span style="font-weight:400;text-transform:none;color:var(--text3);">（2–8）</span></label>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input class="form-input" id="modal-choice-count" type="number" min="2" max="8" value="4" style="width:80px;" oninput="onChoiceCountChange()" />
+          <span style="font-size:13px;color:var(--text2);">→ <span id="choice-count-preview" style="font-weight:500;color:var(--blue);">A、B、C、D</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">考试说明（可选）</label><input class="form-input" id="modal-exam-desc" placeholder="注意事项等…" /></div>
+      <div class="form-group">
+        <label class="form-label">倒计时（分钟，可选）</label>
+        <input class="form-input" id="modal-time-limit" type="number" min="1" max="300" placeholder="不填则不限时" />
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="form-group">
+      <label class="form-label">学生名单 <span style="font-weight:400;text-transform:none;color:var(--text3);">— 每位学生自动生成专属密钥</span></label>
+      <textarea class="form-input" id="modal-student-names" rows="4" placeholder="每行一个学生姓名，例如：&#10;张三&#10;李四&#10;王五"></textarea>
+      <div class="form-hint">保存考试后可在考试卡片里查看每位学生的专属密钥</div>
+    </div>
+    <hr class="divider">
+    <div class="flex-between mb-2">
+      <div style="font-size:14px;font-weight:600;">题目列表 <span style="color:var(--text2);font-weight:400;" id="modal-q-count">(0 题)</span></div>
+      <div class="flex gap-1">
+        <button class="btn btn-sm" onclick="addTextQuestion()" type="button">✏ 添加文字题</button>
+        <label class="btn btn-primary btn-sm" style="cursor:pointer;">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0;"><path d="M6.5 1v8M3 6l3.5 3.5L10 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10v1.5a.5.5 0 00.5.5h10a.5.5 0 00.5-.5V10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          批量上传图片
+          <input type="file" accept="image/*" multiple style="display:none;" onchange="handleBulkUpload(event)" />
+        </label>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">每张图片自动成为一道题，按文件名排列，一次最多10张。上传后可逐题设置正确答案。</div>
+    <div id="modal-question-list"></div>
+    <div class="flex" style="justify-content:flex-end;gap:8px;margin-top:18px;">
+      <button class="btn" onclick="closeExamModal()">取消</button>
+      <button class="btn btn-primary" id="save-exam-btn" onclick="saveExam()"><span id="save-exam-text">保存考试</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- 编辑单题 Modal -->
+<div class="modal-overlay" id="modal-question">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title" id="q-modal-title">编辑题目</div>
+      <button class="icon-btn" onclick="closeQModal()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+
+    <!-- 图片1 -->
+    <div class="form-group">
+      <label class="form-label">题目图片1</label>
+      <div class="upload-zone" onclick="document.getElementById('q-img-input').click()">
+        <div id="upload-placeholder"><div class="upload-icon">📷</div><div>点击上传 / 更换图片</div></div>
+        <div id="upload-preview" style="display:none;">
+          <img id="upload-img-tag" style="max-height:180px;max-width:100%;border-radius:6px;" />
+          <div style="margin-top:6px;font-size:12px;color:var(--text2);">点击更换图片</div>
+        </div>
+      </div>
+      <input type="file" id="q-img-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)" />
+    </div>
+
+    <!-- 图片2 -->
+    <div class="form-group">
+      <label class="form-label">题目图片2（可选）</label>
+      <div class="upload-zone" onclick="document.getElementById('q-img-input2').click()">
+        <div id="upload-placeholder2"><div class="upload-icon">📷</div><div>点击上传第二张图片</div></div>
+        <div id="upload-preview2" style="display:none;">
+          <img id="upload-img-tag2" style="max-height:180px;max-width:100%;border-radius:6px;" />
+          <div style="margin-top:6px;font-size:12px;color:var(--text2);">点击更换 · <span style="color:var(--red);cursor:pointer;" onclick="removeImage2();event.stopPropagation();">删除</span></div>
+        </div>
+      </div>
+      <input type="file" id="q-img-input2" accept="image/*" style="display:none;" onchange="handleImageUpload2(event)" />
+    </div>
+
+    <!-- 文字题目 -->
+    <div class="form-group">
+      <label class="form-label">题目文字（无图片时显示）</label>
+      <textarea class="form-input" id="q-text-input" rows="3" placeholder="在此输入题目文字内容…"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">正确答案</label>
+      <select class="form-input" id="q-correct-answer" style="max-width:160px;"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">答案解析（可选）</label>
+      <textarea class="form-input" id="q-explanation-input" placeholder="解析说明…" rows="3"></textarea>
+    </div>
+    <div class="flex" style="justify-content:flex-end;gap:8px;margin-top:8px;">
+      <button class="btn" onclick="closeQModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveQuestion()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 学生密钥查看 Modal -->
+<div class="modal-overlay" id="modal-keys">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="keys-modal-title">学生专属密钥</div>
+      <button class="icon-btn" onclick="closeKeysModal()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;">每位学生的专属密钥唯一，只能以绑定的姓名登录。请将密钥单独发给对应学生，不要群发。</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button class="btn btn-sm" onclick="copyAllKeys()">📋 复制全部</button>
+    </div>
+    <div id="keys-list"></div>
+    <div class="flex" style="justify-content:flex-end;margin-top:16px;">
+      <button class="btn" onclick="closeKeysModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- 单场考试成绩 Modal -->
+<div class="modal-overlay" id="modal-exam-records">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-header">
+      <div class="modal-title" id="exam-records-modal-title">成绩</div>
+      <div class="flex gap-1">
+        <button class="btn btn-sm" onclick="downloadExamExcel()">⬇ 下载 Excel</button>
+        <button class="icon-btn" onclick="closeExamRecordsModal()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      </div>
+    </div>
+    <div id="exam-records-list"></div>
+    <div class="flex" style="justify-content:flex-end;margin-top:16px;">
+      <button class="btn" onclick="closeExamRecordsModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 防切屏警告遮罩 -->
+<div id="anticheat-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:9998;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:var(--surface);border-radius:var(--radius);padding:28px 32px;max-width:420px;width:100%;text-align:center;box-shadow:var(--shadow-md);">
+    <div style="font-size:40px;margin-bottom:14px;">⚠️</div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:10px;color:var(--red);">检测到离开考试页面</div>
+    <div id="anticheat-msg" style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:12px;"></div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:22px;">累计次数：<strong id="anticheat-count" style="color:var(--red);font-size:16px;">0</strong> / 3 次（超过 3 次自动提交答卷）</div>
+    <button id="anticheat-btn" class="btn btn-primary btn-block btn-lg">我知道了，继续答题</button>
+  </div>
+</div>
+
+<script>
+// 检测 iPad + Safari，显示提示
+(function() {
+  const ua = navigator.userAgent;
+  const isIPad = /iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua) && !/CriOS/.test(ua) && !/FxiOS/.test(ua);
+  if (isIPad && isSafari) {
+    document.addEventListener('DOMContentLoaded', function() {
+      const el = document.getElementById('ipad-safari-alert');
+      if (el) el.style.display = 'block';
+    });
+  }
+})();
+</script>
+<script src="./app2.js"></script>
+</body>
+</html>

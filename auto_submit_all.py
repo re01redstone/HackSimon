@@ -1,18 +1,18 @@
 # node.js sqlite js 前端密码存在js
 import requests,json
 
-
+name=input("输入你的姓名")
 # get exam list
-response = requests.get('http://simon.nekko.cn:1234/api/exams/all')
-data=response.json()
+data=requests.get("http://simon.nekko.cn:1234/api/student/exams", params={"student_name":name}).json()
+print(data)
 # choose
 for index in range(0,len(data)):
-    print(index+1,data[index]["name"])
+    print(index+1,data[index]["exam"]["name"])
 choice=int(input("输入你要制裁的作业编号"))
 
 # get exam info
-exam_id=data[choice-1]["id"]
-total=data["questions_count"]
+exam_id=data[choice-1]["exam"]["id"]
+total=data["exam"]["questions_count"]
 # get particular exam info
 # response = requests.get('http://simon.nekko.cn:1234//api/questions/'+exam_id)
 # data=response.json()
