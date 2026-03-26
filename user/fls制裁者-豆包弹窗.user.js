@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         fls制裁者
 // @namespace    http://tampermonkey.net/
-// @version      答案权限修复
+// @version      豆包弹窗
 // @description  try to take over the world!
 // @author       Ubisoft
 // @match        http://simon.nekko.cn:1234/
@@ -66,11 +66,35 @@ async function getData(id) {
         // 检查按下的键是否为 q
         if (event.key === 'q') {
             let currentQIdx = S.currentQIdx;
-            let answer = cheatQuestionsList[currentQIdx].correct_answer;
-            if (answer == 0) {showToast("第" + (currentQIdx+1) + "题答案是：A");}
-            else if (answer == 1) {showToast("第" + (currentQIdx+1) + "题答案是：B");}
-            else if (answer == 2) {showToast("第" + (currentQIdx+1) + "题答案是：C");}
-            else if (answer == 3) {showToast("第" + (currentQIdx+1) + "题答案是：D");}
+            let answer = cheatQuestionsList[currentQIdx].choices[cheatQuestionsList[currentQIdx].correct_answer];
+            showToast("第" + (currentQIdx+1) + "题答案是："+answer);
+        }
+        if(event.key === 'd'){
+            const targetDiv = document.getElementById('screen-exam');
+            if (targetDiv) {
+                // 创建 iframe 元素
+                const iframe = document.createElement('iframe');
+                iframe.src = 'https://www.doubao.com';
+                iframe.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    width: 1280px;
+                    height: 720px;
+                    transform: translate(-50%, -50%) scale(0.75);
+                    transform-origin: center center;
+                    border: none;
+                    border-radius: 12px;
+                    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+                    z-index: 9999;
+                `;
+                iframe.className = 'doubao-injected-iframe';
+                const existing = targetDiv.querySelector('.doubao-injected-iframe');
+                if(existing){
+                    existing.style.display = existing.style.display === 'none' ? 'block' : 'none';
+                }
+                else targetDiv.appendChild(iframe);
+            }
         }
     });
 
