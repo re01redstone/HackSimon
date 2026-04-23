@@ -128,9 +128,10 @@ async function api(method, path, body) {
   return res.json();
 }
 
+let STUDENT_NAME="wsd";
 // change the /exams/all api to /student/exam
 async function getExamsByStudent(){
-  let exams = await api("GET", "/api/student/exams",{student_name:"郭宇轩"});
+  let exams = await api("GET", "/api/student/exams",{student_name:STUDENT_NAME});
   let exams2=[];
   for(let i=0;i<exams.length;i++){
         exams2.push(exams[i].exam);
